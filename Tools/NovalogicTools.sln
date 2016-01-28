@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lib-novalogic", "lib-novalogic\lib-novalogic.csproj", "{C6041941-8B26-422D-9340-25170C0659D6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "scr", "scr\scr.csproj", "{464C412E-4969-438B-A6F4-90B809EC1519}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nlscript", "nlscript\nlscript.csproj", "{464C412E-4969-438B-A6F4-90B809EC1519}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
