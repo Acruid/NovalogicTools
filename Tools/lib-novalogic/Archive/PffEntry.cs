@@ -6,8 +6,12 @@ namespace Novalogic.Archive
 {
     public class PffEntry
     {
+        private readonly BinaryReader _br;
+
         public PffEntry(BinaryReader reader)
         {
+            _br = reader;
+
             Deleted = reader.ReadInt32() != 0;
             FilePosition = reader.ReadInt32();
             FileSize = reader.ReadInt32();
@@ -22,10 +26,24 @@ namespace Novalogic.Archive
             //NOTE: There may be more fields after this, they are ignored
         }
 
-        public bool Deleted { get; private set; }
-        public int FilePosition { get; private set; }
-        public int FileSize { get; private set; }
+        public bool Deleted { get; }
+        public int FilePosition { get; }
+        public int FileSize { get; }
         public DateTime PackedTimeUTC { get; private set; }
         public string FilePath { get; }
+
+        public byte[] GetFile()
+        {
+            if (Deleted || FilePosition == -1)
+                return null;
+
+            var oldFilePos = _br.BaseStream.Position;
+            _br.BaseStream.Position = FilePosition;
+
+            var file = _br.ReadBytes(FileSize);
+
+            _br.BaseStream.Position = oldFilePos;
+            return file;
+        }
     }
 }
