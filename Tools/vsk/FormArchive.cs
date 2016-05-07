@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Windows.Forms;
 using Novalogic.Archive;
@@ -48,10 +49,17 @@ namespace vsk
                 _archive = null;
             }
 
+            Text = "Archive - []";
+            listView.Items.Clear();
+
+            if (_info == null)
+                return;
+
+            Text = $"Archive - [{_info.FullName}]";
+
             _archive = PffArchive.Open(_info);
             var entries = _archive.Entries;
 
-            listView.Items.Clear();
             listView.BeginUpdate();
             foreach (var entry in entries)
             {
@@ -65,29 +73,24 @@ namespace vsk
 
                 listView.Items.Add(lvi);
             }
-            listView.EndUpdate();
             listView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            listView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+            listView.EndUpdate();
+
+            ClientSize = new Size(listView.PreferredWidth(), ClientSize.Height);
         }
 
         private void listView_ColumnClick(object sender, ColumnClickEventArgs e)
         {
-            // Determine if clicked column is already the column that is being sorted.
-            if (e.Column == _lvwColumnSorter.SortColumn)
+            if (e.Column != _lvwColumnSorter.SortColumn)
             {
-                // Reverse the current sort direction for this column.
-                _lvwColumnSorter.Order = _lvwColumnSorter.Order == SortOrder.Ascending ? SortOrder.Descending : SortOrder.Ascending;
-            }
-            else
-            {
-                // Set the column number that is to be sorted; default to ascending.
                 _lvwColumnSorter.SortColumn = e.Column;
                 _lvwColumnSorter.Order = SortOrder.Ascending;
             }
+            else
+                _lvwColumnSorter.Order = _lvwColumnSorter.Order == SortOrder.Ascending ? SortOrder.Descending : SortOrder.Ascending;
 
-            // Perform the sort with these new sort options.
-            listView.Sort(); //TODO: Make dates and ints sort properly.
-
-            // Show the sort icon.
+            listView.Sort();
             listView.SetSortIcon(_lvwColumnSorter.SortColumn, _lvwColumnSorter.Order);
         }
     }

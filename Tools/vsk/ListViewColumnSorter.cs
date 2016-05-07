@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Windows.Forms;
 
 namespace vsk
@@ -46,14 +47,24 @@ namespace vsk
         public int Compare(object x, object y)
         {
             int compareResult;
-            ListViewItem listviewX, listviewY;
 
             // Cast the objects to be compared to ListViewItem objects
-            listviewX = (ListViewItem)x;
-            listviewY = (ListViewItem)y;
 
+            string viewXText = ((ListViewItem)x).SubItems[ColumnToSort].Text;
+            string viewYText = ((ListViewItem)y).SubItems[ColumnToSort].Text;
+
+            //TODO: Setting up a list of types to reference may be better than TryParse
             // Compare the two items
-            compareResult = ObjectCompare.Compare(listviewX.SubItems[ColumnToSort].Text, listviewY.SubItems[ColumnToSort].Text);
+            int xValue;
+            int yValue;
+            DateTime xDate;
+            DateTime yDate;
+            if (int.TryParse(viewXText, out xValue) && int.TryParse(viewYText, out yValue))
+                compareResult = xValue.CompareTo(yValue);
+            else if (DateTime.TryParse(viewXText, out xDate) && DateTime.TryParse(viewYText, out yDate))
+                compareResult = xDate.CompareTo(yDate);
+            else
+                compareResult = ObjectCompare.Compare(viewXText, viewYText);
 
             // Calculate correct return value based on object comparison
             if (OrderOfSort == SortOrder.Ascending)
