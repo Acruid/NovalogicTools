@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lib-novalogic", "lib-novalogic\lib-novalogic.csproj", "{C6041941-8B26-422D-9340-25170C0659D6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nlscript", "nlscript\nlscript.csproj", "{464C412E-4969-438B-A6F4-90B809EC1519}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pff", "pff\pff.csproj", "{3B4ED300-19F6-42AB-A2F0-640C52F6932F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vsk", "vsk\vsk.csproj", "{2DA406B7-C999-4E14-9DD3-CEFEF2425F46}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{3B4ED300-19F6-42AB-A2F0-640C52F6932F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3B4ED300-19F6-42AB-A2F0-640C52F6932F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3B4ED300-19F6-42AB-A2F0-640C52F6932F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2DA406B7-C999-4E14-9DD3-CEFEF2425F46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DA406B7-C999-4E14-9DD3-CEFEF2425F46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DA406B7-C999-4E14-9DD3-CEFEF2425F46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DA406B7-C999-4E14-9DD3-CEFEF2425F46}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
