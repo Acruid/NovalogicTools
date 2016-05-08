@@ -5,6 +5,8 @@ namespace vsk
 {
     internal static class Program
     {
+        internal static FormParent MainForm { get; private set; }
+
         /// <summary>
         ///     The main entry point for the application.
         /// </summary>
@@ -13,7 +15,8 @@ namespace vsk
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new FormParent());
+            MainForm = new FormParent();
+            Application.Run(MainForm);
         }
     }
 }

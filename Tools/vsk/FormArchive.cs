@@ -93,5 +93,14 @@ namespace vsk
             listView.Sort();
             listView.SetSortIcon(_lvwColumnSorter.SortColumn, _lvwColumnSorter.Order);
         }
+
+        private void listView_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            var listViewItem = listView.HitTest(e.Location).Item;
+            if (listViewItem == null)
+                return;
+
+            Program.MainForm.OpenFilePreview(_archive.GetEntry(listViewItem.Text));
+        }
     }
 }

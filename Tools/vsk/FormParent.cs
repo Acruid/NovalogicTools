@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Forms;
+using Novalogic.Archive;
 
 namespace vsk
 {
@@ -15,6 +16,29 @@ namespace vsk
         public FormParent()
         {
             InitializeComponent();
+#if DEBUG
+            var mdiChild = new FormArchive
+            {
+                MdiParent = this,
+                ArchiveFile = new FileInfo(@"D:\Organization\Games\Delta Force 2\Game\Df2.pff")
+            };
+            mdiChild.Show();
+#endif
+        }
+
+        public void OpenFilePreview(PffEntry fileContents)
+        {
+            if (fileContents == null)
+                return;
+
+
+            //TODO: Reuse window
+            var mdiChild = new FormPreview
+            {
+                MdiParent = this,
+                PreviewFile = fileContents
+            };
+            mdiChild.Show();
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
@@ -23,10 +47,10 @@ namespace vsk
             {
                 var mdiChild = new FormArchive
                 {
-                    MdiParent = this
+                    MdiParent = this,
+                    ArchiveFile = new FileInfo(openFileDialog.FileName)
                 };
                 mdiChild.Show();
-                mdiChild.ArchiveFile = new FileInfo(openFileDialog.FileName);
             }
         }
 
