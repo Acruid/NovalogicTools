@@ -60,7 +60,7 @@ namespace Novalogic.PCX
             var lsize = (long) hdr.BytesPerLine*hdr.NPlanes*(1 + hdr.Window.Ymax - hdr.Window.Ymin);
             var pxNum = 0;
             var pixels = new byte[lsize];
-            for (var l = 0; l < lsize;) /* increment by cnt below */
+            for (var l = 0; l < lsize;) // increment by cnt below
             {
                 byte chr, cnt;
                 Encget(out chr, out cnt, stream);

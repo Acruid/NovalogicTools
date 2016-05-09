@@ -5,6 +5,7 @@ using System.Media;
 using System.Windows.Forms;
 using Novalogic.Archive;
 using Novalogic.PCX;
+using Novalogic.TGA;
 
 namespace vsk
 {
@@ -20,6 +21,7 @@ namespace vsk
         {
             InitializeComponent();
             Text = FormatWindowTitle(string.Empty);
+            pictureBox.SizeMode = PictureBoxSizeMode.AutoSize;
         }
 
         /// <summary>
@@ -57,6 +59,12 @@ namespace vsk
             {
                 case "PCX":
                     img = PcxConvert.LoadPcx(fileContents);
+                    ClientSize = img.Size;
+                    pictureBox.Image = img;
+                    pictureBox.Visible = true;
+                    break;
+                case "TGA":
+                    img = TgaConvert.LoadTga(fileContents);
                     ClientSize = img.Size;
                     pictureBox.Image = img;
                     pictureBox.Visible = true;

@@ -47,6 +47,7 @@
     <Compile Include="PCX\PcxConvert.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Script\ScriptFile.cs" />
+    <Compile Include="TGA\TgaConvert.cs" />
     <Compile Include="Utility.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
