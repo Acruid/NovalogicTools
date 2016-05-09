@@ -45,7 +45,7 @@
             this.actionToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
-            this.menuStrip.Size = new System.Drawing.Size(284, 24);
+            this.menuStrip.Size = new System.Drawing.Size(266, 24);
             this.menuStrip.TabIndex = 0;
             this.menuStrip.Text = "menuStrip";
             this.menuStrip.Visible = false;
@@ -63,8 +63,9 @@
             // extractToolStripMenuItem
             // 
             this.extractToolStripMenuItem.Name = "extractToolStripMenuItem";
-            this.extractToolStripMenuItem.Size = new System.Drawing.Size(109, 22);
+            this.extractToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.extractToolStripMenuItem.Text = "Extract";
+            this.extractToolStripMenuItem.Click += new System.EventHandler(this.extractToolStripMenuItem_Click);
             // 
             // listView
             // 
@@ -76,9 +77,9 @@
             this.listView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView.FullRowSelect = true;
             this.listView.GridLines = true;
-            this.listView.Location = new System.Drawing.Point(0, 0);
+            this.listView.Location = new System.Drawing.Point(0, 24);
             this.listView.Name = "listView";
-            this.listView.Size = new System.Drawing.Size(266, 214);
+            this.listView.Size = new System.Drawing.Size(266, 190);
             this.listView.TabIndex = 1;
             this.listView.UseCompatibleStateImageBehavior = false;
             this.listView.View = System.Windows.Forms.View.Details;

@@ -11,8 +11,12 @@ namespace Novalogic.Archive
         private readonly Pff3Header _header;
         private List<PffEntry> _cachedEntries;
 
-        private PffArchive(BinaryReader reader)
+        public FileInfo FileInfo { get; private set; }
+
+        private PffArchive(FileInfo fileInfo)
         {
+            var reader = new BinaryReader(fileInfo.OpenRead());
+            FileInfo = fileInfo;
             _bReader = reader;
             _header = new Pff3Header(reader);
         }
@@ -28,10 +32,8 @@ namespace Novalogic.Archive
         {
             if (!fileInfo.Exists)
                 return null;
-
-            var reader = new BinaryReader(fileInfo.OpenRead());
-
-            return new PffArchive(reader);
+            
+            return new PffArchive(fileInfo);
         }
 
         /// <summary>
