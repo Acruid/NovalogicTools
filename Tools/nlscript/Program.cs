@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
-using Novalogic.Script;
+using Novalogic.SCR;
 
-namespace SCR
+namespace nlscript
 {
     internal static class Program
     {

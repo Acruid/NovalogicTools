@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace Novalogic.Archive
+namespace Novalogic.PFF
 {
     /// <summary>
     /// </summary>

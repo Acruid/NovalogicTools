@@ -2,7 +2,7 @@
 using System.IO;
 using System.Security;
 using System.Security.Permissions;
-using Novalogic.Archive;
+using Novalogic.PFF;
 
 namespace Pff
 {

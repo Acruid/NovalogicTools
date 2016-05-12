@@ -7,7 +7,7 @@
     <ProjectGuid>{464C412E-4969-438B-A6F4-90B809EC1519}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SCR</RootNamespace>
+    <RootNamespace>nlscript</RootNamespace>
     <AssemblyName>nlscript</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

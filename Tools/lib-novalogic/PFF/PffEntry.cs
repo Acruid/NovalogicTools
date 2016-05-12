@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace Novalogic.Archive
+namespace Novalogic.PFF
 {
     public class PffEntry
     {

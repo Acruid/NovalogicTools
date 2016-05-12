@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace Novalogic.Script
+namespace Novalogic.SCR
 {
     public static class ScriptFile
     {

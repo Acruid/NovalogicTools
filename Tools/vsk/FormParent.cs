@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Forms;
-using Novalogic.Archive;
+using Novalogic.PFF;
 
 namespace vsk
 {

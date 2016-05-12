@@ -3,8 +3,8 @@ using System.Drawing;
 using System.IO;
 using System.Media;
 using System.Windows.Forms;
-using Novalogic.Archive;
 using Novalogic.PCX;
+using Novalogic.PFF;
 using Novalogic.TGA;
 
 namespace vsk

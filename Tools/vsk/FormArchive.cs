@@ -5,7 +5,7 @@ using System.IO;
 using System.Security;
 using System.Security.Permissions;
 using System.Windows.Forms;
-using Novalogic.Archive;
+using Novalogic.PFF;
 
 namespace vsk
 {
