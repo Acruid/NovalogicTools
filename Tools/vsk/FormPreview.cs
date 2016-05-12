@@ -49,7 +49,7 @@ namespace vsk
 
             Text = FormatWindowTitle(entry.FilePath);
 
-            var fileContents = entry.GetFile();
+            var fileContents = entry.GetContents();
             if (fileContents == null)
                 return;
 

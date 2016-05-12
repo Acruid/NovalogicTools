@@ -68,7 +68,7 @@ namespace vsk
             {
                 var name = entry.FilePath;
                 var lvi = new ListViewItem(name);
-                lvi.SubItems.Add(entry.PackedTimeUTC.ToLocalTime().ToString(CultureInfo.CurrentCulture));
+                lvi.SubItems.Add(entry.PackedTimeUtc.ToLocalTime().ToString(CultureInfo.CurrentCulture));
                 lvi.SubItems.Add(name.IndexOfAny(Path.GetInvalidFileNameChars()) != -1
                     ? ""
                     : Path.GetExtension(entry.FilePath)?.Substring(1));
@@ -123,11 +123,11 @@ namespace vsk
                 if (entry != null)
                 {
                     var filePath = Path.Combine(extractDir, entry.FilePath);
-                    var contents = entry.GetFile();
+                    var contents = entry.GetContents();
                     if (contents != null)
                     {
                         File.WriteAllBytes(filePath, contents);
-                        File.SetLastWriteTime(filePath, entry.PackedTimeUTC.ToLocalTime());
+                        File.SetLastWriteTime(filePath, entry.PackedTimeUtc.ToLocalTime());
                     }
                 }
 

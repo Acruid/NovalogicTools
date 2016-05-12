@@ -1,48 +1,47 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 
 namespace Novalogic.Archive
 {
     public class PffEntry
     {
-        private readonly BinaryReader _br;
+        private readonly PffArchive.IPffEntry _entry;
+        private readonly BinaryReader _reader;
 
-        public PffEntry(BinaryReader reader)
+        public PffEntry(BinaryReader reader, PffArchive.IPffEntry entry)
         {
-            _br = reader;
-
-            Deleted = reader.ReadInt32() != 0;
-            FilePosition = reader.ReadInt32();
-            FileSize = reader.ReadInt32();
-
-            var timeT = reader.ReadUInt32();
-            PackedTimeUTC = new DateTime(1970, 1, 1).AddSeconds(timeT);
-
-            var bName = reader.ReadBytes(0x0F);
-            FilePath = Encoding.ASCII.GetString(bName, 0, bName.Length);
-            FilePath = FilePath.TrimEnd('\0');
-
-            //NOTE: There may be more fields after this, they are ignored
+            _reader = reader;
+            _entry = entry;
         }
 
-        public bool Deleted { get; }
-        public int FilePosition { get; }
-        public int FileSize { get; }
-        public DateTime PackedTimeUTC { get; private set; }
-        public string FilePath { get; }
+        public uint FileSize => _entry.FileSize;
+        public DateTime PackedTimeUtc => new DateTime(1970, 1, 1).AddSeconds(_entry.FileModified);
+        public string FilePath => Utility.TextEncode.GetString(_entry.FileName, 0, _entry.FileName.Length).TrimEnd('\0');
 
-        public byte[] GetFile()
+        /// <summary>
+        ///     Retrieves the contents of the file.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="IOException">An I/O error occurs. </exception>
+        /// <exception cref="NotSupportedException">The stream does not support seeking. </exception>
+        /// <exception cref="ObjectDisposedException">Methods were called after the stream was closed. </exception>
+        /// <exception cref="ArgumentException">
+        ///     The number of decoded characters to read is greater than FileSize. This can happen
+        ///     if a Unicode decoder returns fallback characters or a surrogate pair.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///     FileSize is negative.
+        /// </exception>
+        public byte[] GetContents()
         {
-            if (Deleted || FilePosition == -1)
+            if (_entry.Deleted != 0 || _entry.FileOffset == uint.MaxValue)
                 return null;
 
-            var oldFilePos = _br.BaseStream.Position;
-            _br.BaseStream.Position = FilePosition;
-
-            var file = _br.ReadBytes(FileSize);
-
-            _br.BaseStream.Position = oldFilePos;
+            var stream = _reader.BaseStream;
+            var oldFilePos = stream.Position;
+            stream.Position = _entry.FileOffset;
+            var file = _reader.ReadBytes((int) _entry.FileSize);
+            stream.Position = oldFilePos;
             return file;
         }
     }

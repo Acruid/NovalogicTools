@@ -62,12 +62,12 @@ namespace Pff
                     foreach (var pffEntry in archive.Entries)
                     {
                         var filePath = Path.Combine(extractDir, pffEntry.FilePath);
-                        var contents = pffEntry.GetFile();
+                        var contents = pffEntry.GetContents();
 
                         if (contents != null)
                         {
                             File.WriteAllBytes(filePath, contents);
-                            File.SetLastWriteTime(filePath, pffEntry.PackedTimeUTC.ToLocalTime());
+                            File.SetLastWriteTime(filePath, pffEntry.PackedTimeUtc.ToLocalTime());
                         }
                     }
                 }
