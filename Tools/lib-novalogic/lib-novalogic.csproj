@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="3DI\File3di.cs" />
     <Compile Include="PFF\PffArchive.cs" />
     <Compile Include="PFF\PffEntry.cs" />
     <Compile Include="PCX\PcxConvert.cs" />

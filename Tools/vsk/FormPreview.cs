@@ -3,6 +3,7 @@ using System.Drawing;
 using System.IO;
 using System.Media;
 using System.Windows.Forms;
+using Novalogic._3DI;
 using Novalogic.PCX;
 using Novalogic.PFF;
 using Novalogic.TGA;
@@ -82,8 +83,12 @@ namespace vsk
                         simpleSound.Play();
                     }
                     break;
+                case "3DI":
+                    var file = File3di.Open(fileContents);
+                    //TODO: Display preview of 3DI file.
+                    break;
                 default:
-                    throw new NotImplementedException();
+                    throw new NotSupportedException();
             }
         }
 
