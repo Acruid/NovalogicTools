@@ -34,6 +34,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Documents\Visual Studio 2015\Libraries\OpenTK-1.1\1.1\Binaries\OpenTK\Release\OpenTK.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenTK.GLControl, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Documents\Visual Studio 2015\Libraries\OpenTK-1.1\1.1\Binaries\OpenTK\Release\OpenTK.GLControl.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -69,6 +77,18 @@
     <Compile Include="ListViewExtensions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Rendering\Camera.cs" />
+    <Compile Include="Rendering\Program.cs" />
+    <Compile Include="Rendering\RenderControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Rendering\RenderControl.Designer.cs">
+      <DependentUpon>RenderControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Rendering\Shader.cs" />
+    <Compile Include="Rendering\ShaderProgram.cs" />
+    <Compile Include="Rendering\VAO.cs" />
+    <Compile Include="Rendering\VBO.cs" />
     <EmbeddedResource Include="FormArchive.resx">
       <DependentUpon>FormArchive.cs</DependentUpon>
     </EmbeddedResource>
@@ -97,6 +117,10 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="Rendering\Shaders\fragment.gls" />
+    <None Include="Rendering\Shaders\frag_uniColor.gls" />
+    <None Include="Rendering\Shaders\vertex.gls" />
+    <None Include="Rendering\Shaders\vert_uniColor.gls" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -1,0 +1,14 @@
+﻿#version 330
+
+precision highp float;
+
+uniform mat4 projection_matrix;
+uniform mat4 modelview_matrix;
+uniform mat4 scale_matrix;
+
+layout(location = 0) in vec3 in_position;
+
+void main(void)
+{
+    gl_Position = projection_matrix * modelview_matrix * scale_matrix * vec4(in_position, 1);
+}
