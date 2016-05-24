@@ -78,7 +78,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rendering\Camera.cs" />
-    <Compile Include="Rendering\Program.cs" />
+    <Compile Include="Rendering\ModelRenderer.cs" />
     <Compile Include="Rendering\RenderControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -117,10 +117,18 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="Rendering\Shaders\fragment.gls" />
-    <None Include="Rendering\Shaders\frag_uniColor.gls" />
-    <None Include="Rendering\Shaders\vertex.gls" />
-    <None Include="Rendering\Shaders\vert_uniColor.gls" />
+    <None Include="Rendering\Shaders\fragment.gls">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Rendering\Shaders\frag_uniColor.gls">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Rendering\Shaders\vertex.gls">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Rendering\Shaders\vert_uniColor.gls">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

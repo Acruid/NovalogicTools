@@ -7,6 +7,7 @@ using Novalogic._3DI;
 using Novalogic.PCX;
 using Novalogic.PFF;
 using Novalogic.TGA;
+using vsk.Rendering;
 
 namespace vsk
 {
@@ -15,6 +16,8 @@ namespace vsk
     /// </summary>
     public partial class FormPreview : Form
     {
+        private ModelRenderer _renderer;
+
         /// <summary>
         ///     Initializer.
         /// </summary>
@@ -85,10 +88,10 @@ namespace vsk
                     break;
                 case "3DI":
                     var file = File3di.Open(fileContents);
-                    //TODO: Display preview of 3DI file.
+                    _renderer = new ModelRenderer(renderControl, file);
                     break;
                 default:
-                    throw new NotSupportedException();
+                    break;
             }
         }
 

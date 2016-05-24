@@ -67,15 +67,15 @@ namespace Render
         public void SetUniformMatrix4(string uniformName, bool transpose, ref Matrix4 matrix)
         {
             Use();
-            var uniformID = GetUniform(uniformName);
-            GL.UniformMatrix4(uniformID, transpose, ref matrix);
+            var uniformId = GetUniform(uniformName);
+            GL.UniformMatrix4(uniformId, transpose, ref matrix);
         }
 
         public void SetUniformVec4(string uniformName, ref Vector4 vector)
         {
             Use();
-            var uniformID = GetUniform(uniformName);
-            GL.Uniform4(uniformID, vector);
+            var uniformId = GetUniform(uniformName);
+            GL.Uniform4(uniformId, vector);
         }
     }
 }

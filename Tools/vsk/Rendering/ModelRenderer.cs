@@ -1,25 +1,20 @@
-﻿// This code was written for the OpenTK library and has been released
-// to the Public Domain.
-// It is provided "as is" without express or implied warranty of any kind.
-
-// http://www.opengl-tutorial.org/
+﻿// http://www.opengl-tutorial.org/
 
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.IO;
 using System.Runtime.InteropServices;
+using Novalogic._3DI;
 using OpenTK;
-using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
-using OpenTK.Input;
-//using Render.Loader;
+using OpenTK.Platform;
+using Render;
 using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
-namespace Render
+namespace vsk.Rendering
 {
-    public class HelloGL3
+    internal class ModelRenderer
     {
         public static Vector3 Up = new Vector3(0, 0, 1);
         public static Vector3 Center = new Vector3(0, 0, 0);
@@ -47,24 +42,28 @@ namespace Render
         };
 
         private readonly Camera _camera = new Camera();
-        // The callback delegate must be stored to avoid GC
-        private readonly DebugProc _debugCallbackInstance = DebugCallback;
-        private readonly Dictionary<int, int> _texHandles = new Dictionary<int, int>();
-//        private int _vboIndicies;
+        private readonly DebugProc _debugCallbackInstance = DebugCallback; // The callback delegate must be stored to avoid GC
+        private readonly File3di _file;
 
-        private readonly List<VAO> _vaoModel = new List<VAO>();
+        private readonly Dictionary<int, int> _texHandles = new Dictionary<int, int>();
+        private readonly List<VAO> _vaoModels = new List<VAO>();
+        private readonly List<int> _vaoTextures = new List<int>();
+        private readonly IGameWindow _viewport;
         private Matrix4 _modelviewMatrix;
-//        private Model3D _obj;
         private ShaderProgram _shaderTextured;
         private ShaderProgram _shaderUniColor;
         private VAO _vaoGrid;
 
-        private HelloGL3()
-            : base(1366, 768,
-                new GraphicsMode(), "OpenGL 3 Example", 0,
-                DisplayDevice.Default, 3, 2,
-                GraphicsContextFlags.ForwardCompatible | GraphicsContextFlags.Debug)
+        public ModelRenderer(IGameWindow control, File3di file)
         {
+            _viewport = control;
+            _file = file;
+
+            _viewport.MakeCurrent();
+            OnLoad(EventArgs.Empty);
+
+            _viewport.UpdateFrame += OnUpdateFrame;
+            _viewport.RenderFrame += OnRenderFrame;
         }
 
         private static void DebugCallback(DebugSource source, DebugType type, int id,
@@ -149,68 +148,38 @@ namespace Render
 
         private static TextureUnit GetTexUnit(int num)
         {
-            return (TextureUnit.Texture0 + num);
+            return TextureUnit.Texture0 + num;
         }
 
         /// <summary>
         ///     Called after an OpenGL context has been established, but before entering the main loop.
         /// </summary>
         /// <param name="e">Not used.</param>
-        protected override void OnLoad(EventArgs e)
+        private void OnLoad(EventArgs e)
         {
-            VSync = VSyncMode.On;
-
             GL.DebugMessageCallback(_debugCallbackInstance, IntPtr.Zero);
 
             _shaderUniColor = new ShaderProgram();
-            _shaderUniColor.Add(new Shader(ShaderType.VertexShader, @"Shaders/vert_uniColor.gls"));
-            _shaderUniColor.Add(new Shader(ShaderType.FragmentShader, @"Shaders/frag_uniColor.gls"));
+            _shaderUniColor.Add(new Shader(ShaderType.VertexShader, @"Rendering/Shaders/vert_uniColor.gls"));
+            _shaderUniColor.Add(new Shader(ShaderType.FragmentShader, @"Rendering/Shaders/frag_uniColor.gls"));
             _shaderUniColor.Compile();
 
-//            TerrainDef terrainDef = TrnLoader.Load(@"Data/DFG3/DFG3.TRN");
-
-//            _obj = Obj.Create(new FileInfo(@"Models\debug2\cube.obj"));
-            _obj = _3DI.Create(new FileInfo(@"Models/BSFLGBLU.3DI"));
-//            _obj = _3DI.Create(new FileInfo(@"Models/TANKJAX.3DI"));
-//            _obj = _3DI.Create(new FileInfo(@"Models/BARREL.3DI"));
-//            _obj = _3DI.Create(new FileInfo(@"Models/ADWL.3DI"));
-
-            _obj.ExportObj();
-
             _shaderTextured = new ShaderProgram();
-
-            _shaderTextured.Add(new Shader(ShaderType.VertexShader, @"Shaders/vertex.gls"));
-            _shaderTextured.Add(new Shader(ShaderType.FragmentShader, @"Shaders/fragment.gls"));
-
+            _shaderTextured.Add(new Shader(ShaderType.VertexShader, @"Rendering/Shaders/vertex.gls"));
+            _shaderTextured.Add(new Shader(ShaderType.FragmentShader, @"Rendering/Shaders/fragment.gls"));
             _shaderTextured.Compile();
             _shaderTextured.Use();
 
             CreateShaders();
+            CreateTextures();
             CreateVAO();
 
             // Other state
             GL.Enable(EnableCap.DepthTest);
             GL.DepthFunc(DepthFunction.Less);
-//            GL.Enable(EnableCap.CullFace);
 
-//            GL.PointSize(3);
-//            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
-
-            GL.Viewport(0, 0, Width, Height);
+            GL.Viewport(0, 0, _viewport.Width, _viewport.Height);
             GL.ClearColor(Color.MidnightBlue);
-
-            for (var i = 0; i < _obj.Meshes.Count; i++)
-            {
-                var texName = _obj.Meshes[i].Material;
-                if (!string.IsNullOrEmpty(texName))
-                {
-                    _texHandles[i] = LoadTexture(_obj.Materials[texName].diffuseMap);
-                }
-                else
-                {
-                    _texHandles[i] = LoadTexture(@"Models/error.jpg");
-                }
-            }
         }
 
         /// <summary>
@@ -244,20 +213,38 @@ namespace Render
             return id;
         }
 
+        private static int LoadTexture(Bitmap texture)
+        {
+            var id = GL.GenTexture();
+            GL.BindTexture(TextureTarget.Texture2D, id);
+
+            // We will not upload mipmaps, so disable mipmapping (otherwise the texture will not appear).
+            // We can use GL.GenerateMipmaps() or GL.Ext.GenerateMipmaps() to create
+            // mipmaps automatically. In that case, use TextureMinFilter.LinearMipmapLinear to enable them.
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Nearest);
+
+            var bmpData = texture.LockBits(new Rectangle(0, 0, texture.Width, texture.Height), ImageLockMode.ReadOnly, texture.PixelFormat);
+
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, bmpData.Width, bmpData.Height, 0,
+                OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, bmpData.Scan0);
+            texture.UnlockBits(bmpData);
+
+            return id;
+        }
+
         private void CreateShaders()
         {
             // generate values for shader uniform variables
             Matrix4 projectionMatrix;
-            var aspectRatio = ClientSize.Width/(float) (ClientSize.Height);
+            var aspectRatio = _viewport.ClientSize.Width/(float) _viewport.ClientSize.Height;
             Matrix4.CreatePerspectiveFieldOfView((float) Math.PI/4, aspectRatio, 1, 1000, out projectionMatrix);
             _modelviewMatrix = Matrix4.LookAt(Spawn, Center, Up);
 
             // We do some heuristics to try to auto-zoom to a reasonable distance.  And it generally works!
             double w, l, h;
-            _obj.Meshes[0].Dimensions(out w, out l, out h);
-            Console.WriteLine("Model dimensions: {0} x {1} x {2}", w, l, h);
+            _file.Lods[0].Dimensions(out w, out l, out h);
             var maxdim = Math.Max(Math.Max(w, l), h);
-//            _viewDist = (float)(maxdim * 2);
 
             var scaleMatrix = Matrix4.CreateScale((float) (1/maxdim));
 
@@ -279,26 +266,30 @@ namespace Render
 
         private void CreateVAO()
         {
-            foreach (var mesh in _obj.Meshes)
+            var lod = _file.Lods[0];
+
+            foreach (var mesh in BuildMeshes(lod))
             {
                 var vao = new VAO(PrimitiveType.Triangles, mesh.CoordVerts.Count);
                 vao.Use();
 
                 var vbo = new VBO();
-                vbo.Buffer(BufferTarget.ArrayBuffer, mesh.CoordVerts.ToArray(), 3, BufferUsageHint.StaticDraw);
+                vbo.Buffer(BufferTarget.ArrayBuffer, mesh.CoordVerts.ToArray(), 4);
                 vao.AddVBO(0, vbo);
 
                 vbo = new VBO();
-                vbo.Buffer(BufferTarget.ArrayBuffer, mesh.CoordNorm.ToArray(), 3, BufferUsageHint.StaticDraw);
+                vbo.Buffer(BufferTarget.ArrayBuffer, mesh.CoordNorms.ToArray(), 4);
                 vao.AddVBO(1, vbo);
 
                 vbo = new VBO();
-                vbo.Buffer(BufferTarget.ArrayBuffer, mesh.CoordTex.ToArray(), 2, BufferUsageHint.StaticDraw);
+                vbo.Buffer(BufferTarget.ArrayBuffer, mesh.CoordTex.ToArray(), 2);
                 vao.AddVBO(3, vbo);
 
-                _vaoModel.Add(vao);
-            }
+                _vaoModels.Add(vao);
 
+                var lodMat = lod.Materials[mesh.MatIndex];
+                _vaoTextures.Add(lodMat.TexIndex);
+            }
             _vaoGrid = new VAO(PrimitiveType.Lines, _axisVerts.Length)
             {
                 DisableDepth = true
@@ -306,10 +297,65 @@ namespace Render
             _vaoGrid.Use();
 
             var gridVerts = new VBO();
-            gridVerts.Buffer(BufferTarget.ArrayBuffer, _axisVerts, 3, BufferUsageHint.StaticDraw);
+            gridVerts.Buffer(BufferTarget.ArrayBuffer, _axisVerts, 3);
             _vaoGrid.AddVBO(0, gridVerts);
 
             CheckError();
+        }
+
+        private static IEnumerable<GlMesh> BuildMeshes(File3di.ModelLod lod)
+        {
+            var meshes = new List<GlMesh>();
+
+            for (var iBones = 0; iBones < lod.SubObjects.Count; iBones++)
+            {
+                var subObj = lod.SubObjects[iBones];
+
+                //sub.BoneDiffOffset = sub.BoneDiffOffset - SubObjects[sub.parentBone].BoneDiffOffset;
+
+                var foff = lod.FaceOffset(iBones);
+                var voff = lod.VecOffset(iBones);
+
+                for (var i = 0; i < subObj.nFaces; i++)
+                {
+                    var face = lod.Faces[i + foff];
+
+                    var mesh = meshes.Find(g => g.MatIndex == face.MaterialIndex);
+                    if (mesh == null)
+                    {
+                        mesh = new GlMesh {MatIndex = face.MaterialIndex};
+                        meshes.Add(mesh);
+                    }
+
+                    var vec4 = lod.Vertices[face.Vertex1 + voff];
+                    mesh.CoordVerts.Add(vec4 - subObj.BoneOffset);
+                    vec4 = lod.Vertices[face.Vertex2 + voff];
+                    mesh.CoordVerts.Add(vec4 - subObj.BoneOffset);
+                    vec4 = lod.Vertices[face.Vertex3 + voff];
+                    mesh.CoordVerts.Add(vec4 - subObj.BoneOffset);
+
+                    mesh.CoordTex.Add(new Vector2(face.tu1/65536.0f, face.tv1/65536.0f));
+                    mesh.CoordTex.Add(new Vector2(face.tu2/65536.0f, face.tv2/65536.0f));
+                    mesh.CoordTex.Add(new Vector2(face.tu3/65536.0f, face.tv3/65536.0f));
+
+                    vec4 = lod.Normals[face.Normal1];
+                    mesh.CoordNorms.Add(vec4);
+                    vec4 = lod.Normals[face.Normal2];
+                    mesh.CoordNorms.Add(vec4);
+                    vec4 = lod.Normals[face.Normal3];
+                    mesh.CoordNorms.Add(vec4);
+                }
+            }
+
+            return meshes;
+        }
+
+        private void CreateTextures()
+        {
+            for (var i = 0; i < _file.Textures.Count; i++)
+            {
+                _texHandles[i] = LoadTexture(_file.Textures[i].Tex);
+            }
         }
 
         private void BindTexture(ref int textureId, TextureUnit textureUnit, string uniformName)
@@ -319,19 +365,8 @@ namespace Render
             GL.Uniform1(_shaderTextured.GetUniform(uniformName), textureUnit - TextureUnit.Texture0);
         }
 
-        /// <summary>
-        ///     Called when the frame is updated.
-        /// </summary>
-        /// <param name="e">Contains information necessary for frame updating.</param>
-        /// <remarks>
-        ///     Subscribe to the <see cref="E:OpenTK.GameWindow.UpdateFrame" /> event instead of overriding this method.
-        /// </remarks>
-        protected override void OnUpdateFrame(FrameEventArgs e)
+        private void OnUpdateFrame(object obj, FrameEventArgs e)
         {
-            var keyboard = OpenTK.Input.Keyboard.GetState();
-            if (keyboard[Key.Escape])
-                Exit();
-
             if (!_camera.Think(e.Time))
                 return;
 
@@ -340,24 +375,18 @@ namespace Render
             _shaderUniColor.SetUniformMatrix4("modelview_matrix", false, ref modelView);
         }
 
-        /// <summary>
-        ///     Called when the frame is rendered.
-        /// </summary>
-        /// <param name="e">Contains information necessary for frame rendering.</param>
-        /// <remarks>
-        ///     Subscribe to the <see cref="E:OpenTK.GameWindow.RenderFrame" /> event instead of overriding this method.
-        /// </remarks>
-        protected override void OnRenderFrame(FrameEventArgs e)
+
+        private void OnRenderFrame(object obj, FrameEventArgs e)
         {
             // clear the last buffer from the screen
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             // draw the model
             _shaderTextured.Use();
-            for (var i = 0; i < _vaoModel.Count; i++)
+            for (var i = 0; i < _vaoModels.Count; i++)
             {
-                var vao = _vaoModel[i];
-                var tex = _texHandles[i];
+                var vao = _vaoModels[i];
+                var tex = _texHandles[_vaoTextures[i]];
                 BindTexture(ref tex, GetTexUnit(i), "mytexture");
                 vao.Use();
                 vao.Render();
@@ -369,7 +398,16 @@ namespace Render
             _vaoGrid.Render();
 
             // finish rendering
-            SwapBuffers();
+            _viewport.SwapBuffers();
+        }
+
+        private class GlMesh
+        {
+            public readonly List<Vector4> CoordNorms = new List<Vector4>();
+            public readonly List<Vector2> CoordTex = new List<Vector2>();
+
+            public readonly List<Vector4> CoordVerts = new List<Vector4>();
+            public int MatIndex;
         }
     }
 }

@@ -2,28 +2,29 @@
 using System.Runtime.InteropServices;
 using OpenTK.Graphics.OpenGL;
 
-namespace Render
+namespace vsk.Rendering
 {
     internal class VBO
     {
-        public BufferTarget target;
+        private BufferTarget Target { get; set; }
         public int ElementSize { get; private set; }
-        public int Handle { get; private set; }
+        private int Handle { get; set; }
 
-        public void Buffer<T>(BufferTarget target, T[] buffer, int elementSize, BufferUsageHint hint) where T : struct
+        public void Buffer<T>(BufferTarget target, T[] buffer, int elementSize, BufferUsageHint hint = BufferUsageHint.StaticDraw) where T : struct
         {
             ElementSize = elementSize;
-            this.target = target;
+            Target = target;
+
             Handle = GL.GenBuffer();
             GL.BindBuffer(target, Handle);
             GL.BufferData(target,
-                new IntPtr(buffer.Length*Marshal.SizeOf(typeof (T))),
-                buffer, BufferUsageHint.StaticDraw);
+                new IntPtr(buffer.Length*Marshal.SizeOf(typeof(T))),
+                buffer, hint);
         }
 
         public void Bind()
         {
-            GL.BindBuffer(target, Handle);
+            GL.BindBuffer(Target, Handle);
         }
     }
 }
