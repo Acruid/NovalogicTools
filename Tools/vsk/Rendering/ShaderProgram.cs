@@ -1,24 +1,28 @@
 ﻿using System;
+using System.Collections.Generic;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using Render;
 
-namespace Render
+namespace vsk.Rendering
 {
     internal class ShaderProgram
     {
         private int _handle = -1;
-        public Shader FragmentShader;
-        public Shader VertexShader;
+        private Shader _fragmentShader;
+        private Shader _vertexShader;
+        private readonly Dictionary<string, int> _uniformCache = new Dictionary<string, int>();
 
         public void Add(Shader shader)
         {
+            _uniformCache.Clear();
             switch (shader.Type)
             {
                 case ShaderType.VertexShader:
-                    VertexShader = shader;
+                    _vertexShader = shader;
                     break;
                 case ShaderType.FragmentShader:
-                    FragmentShader = shader;
+                    _fragmentShader = shader;
                     break;
                 default:
                     throw new Exception("Tride to add wrong shader type!");
@@ -27,13 +31,14 @@ namespace Render
 
         public void Compile()
         {
+            _uniformCache.Clear();
             _handle = GL.CreateProgram();
 
-            if (VertexShader != null)
-                GL.AttachShader(_handle, VertexShader.Handle);
+            if (_vertexShader != null)
+                GL.AttachShader(_handle, _vertexShader.Handle);
 
-            if (FragmentShader != null)
-                GL.AttachShader(_handle, FragmentShader.Handle);
+            if (_fragmentShader != null)
+                GL.AttachShader(_handle, _fragmentShader.Handle);
 
             GL.LinkProgram(_handle);
 
@@ -58,10 +63,15 @@ namespace Render
             if (_handle == -1)
                 throw new Exception("Shader has no valid handle!");
 
-            var ret = GL.GetUniformLocation(_handle, name);
-            if (ret == -1)
+            int result;
+            if (_uniformCache.TryGetValue(name, out result))
+                return result;
+
+            result = GL.GetUniformLocation(_handle, name);
+            if (result == -1)
                 throw new Exception("Could not get uniform!");
-            return ret;
+            _uniformCache.Add(name, result);
+            return result;
         }
 
         public void SetUniformMatrix4(string uniformName, bool transpose, ref Matrix4 matrix)
