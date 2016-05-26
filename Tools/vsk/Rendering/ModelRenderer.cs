@@ -18,7 +18,10 @@ namespace vsk.Rendering
     {
         public static Vector3 Up = new Vector3(0, 0, 1);
         public static Vector3 Center = new Vector3(0, 0, 0);
-        public static Vector3 Spawn = new Vector3(-2.0f, 0, 1.0f);
+        public static Vector3 Spawn = new Vector3(2, 0, 0);
+
+        private static readonly Color BackColor = Color.FromArgb(51, 127, 178);
+        private static readonly Color GridColor = Color.FromArgb(102, 102, 102);
 
         private readonly Vector3[] _axisVerts =
         {
@@ -41,7 +44,7 @@ namespace vsk.Rendering
             new Vector3(1, -1, 0)
         };
 
-        private readonly Camera _camera = new Camera();
+        private Camera _camera;
         private readonly DebugProc _debugCallbackInstance = DebugCallback; // The callback delegate must be stored to avoid GC
         private readonly File3di _file;
 
@@ -49,7 +52,7 @@ namespace vsk.Rendering
         private readonly List<VAO> _vaoModels = new List<VAO>();
         private readonly List<int> _vaoTextures = new List<int>();
         private readonly IGameWindow _viewport;
-        private Matrix4 _modelviewMatrix;
+        private Matrix4 _viewMatrix;
         private ShaderProgram _shaderTextured;
         private ShaderProgram _shaderUniColor;
         private VAO _vaoGrid;
@@ -179,7 +182,7 @@ namespace vsk.Rendering
             GL.DepthFunc(DepthFunction.Less);
 
             GL.Viewport(0, 0, _viewport.Width, _viewport.Height);
-            GL.ClearColor(Color.MidnightBlue);
+            GL.ClearColor(BackColor);
         }
 
         /// <summary>
@@ -235,29 +238,29 @@ namespace vsk.Rendering
 
         private void CreateShaders()
         {
-            // generate values for shader uniform variables
-            Matrix4 projectionMatrix;
-            var aspectRatio = _viewport.ClientSize.Width/(float) _viewport.ClientSize.Height;
-            Matrix4.CreatePerspectiveFieldOfView((float) Math.PI/4, aspectRatio, 1, 1000, out projectionMatrix);
-            _modelviewMatrix = Matrix4.LookAt(Spawn, Center, Up);
+            var lod = _file.Lods[0];
 
-            // We do some heuristics to try to auto-zoom to a reasonable distance.  And it generally works!
+            _camera = new Camera(_viewport.ClientSize, Spawn, Center, Up);
+            var projectionMatrix = _camera.ProjectionMatrix;
+            _viewMatrix = _camera.ViewMatrix;
+
             double w, l, h;
             _file.Lods[0].Dimensions(out w, out l, out h);
-            var maxdim = Math.Max(Math.Max(w, l), h);
+//            var maxdim = Math.Max(Math.Max(w, l), h);
+            var maxdim = Math.Max(w, l);
 
             var scaleMatrix = Matrix4.CreateScale((float) (1/maxdim));
 
             _shaderTextured.SetUniformMatrix4("projection_matrix", false, ref projectionMatrix);
-            _shaderTextured.SetUniformMatrix4("modelview_matrix", false, ref _modelviewMatrix);
+            _shaderTextured.SetUniformMatrix4("modelview_matrix", false, ref _viewMatrix);
             _shaderTextured.SetUniformMatrix4("scale_matrix", false, ref scaleMatrix);
 
             _shaderUniColor.Use();
 
-            scaleMatrix = Matrix4.CreateScale(1.0f);
-            var color = new Vector4(1, 0, 0, 1);
+            scaleMatrix = Matrix4.Identity;
+            var color = new Vector4(GridColor.R/(float)byte.MaxValue, GridColor.G / (float)byte.MaxValue, GridColor.B / (float)byte.MaxValue, GridColor.A / (float)byte.MaxValue);
             _shaderUniColor.SetUniformMatrix4("projection_matrix", false, ref projectionMatrix);
-            _shaderUniColor.SetUniformMatrix4("modelview_matrix", false, ref _modelviewMatrix);
+            _shaderUniColor.SetUniformMatrix4("modelview_matrix", false, ref _viewMatrix);
             _shaderUniColor.SetUniformMatrix4("scale_matrix", false, ref scaleMatrix);
             _shaderUniColor.SetUniformVec4("vertColor", ref color);
 
@@ -370,7 +373,7 @@ namespace vsk.Rendering
             if (!_camera.Think(e.Time))
                 return;
 
-            var modelView = _camera.ModelView;
+            var modelView = _camera.ViewMatrix;
             _shaderTextured.SetUniformMatrix4("modelview_matrix", false, ref modelView);
             _shaderUniColor.SetUniformMatrix4("modelview_matrix", false, ref modelView);
         }

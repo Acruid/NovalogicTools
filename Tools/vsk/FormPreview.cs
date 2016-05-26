@@ -89,8 +89,7 @@ namespace vsk
                 case "3DI":
                     var file = File3di.Open(fileContents);
                     _renderer = new ModelRenderer(renderControl, file);
-                    break;
-                default:
+                    renderControl.Visible = true;
                     break;
             }
         }

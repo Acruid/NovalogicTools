@@ -269,12 +269,12 @@ namespace Novalogic._3DI
             private readonly int SphereRadius;
             private readonly int CircleRadius;
             private readonly int zTotal;
-            private readonly int xMin;
-            private readonly int xMax;
-            private readonly int yMin;
-            private readonly int yMax;
-            private readonly int zMin;
-            private readonly int zMax;
+            public readonly int xMin;
+            public readonly int xMax;
+            public readonly int yMin;
+            public readonly int yMax;
+            public readonly int zMin;
+            public readonly int zMax;
 
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)] private readonly int[] null2;
 
@@ -409,6 +409,8 @@ namespace Novalogic._3DI
                 length = maxy - miny;
                 height = maxz - minz;
             }
+
+            public Vector3 ModelCenter => new Vector3(header.xMax - header.xMin, header.yMax - header.yMin, header.zMax - header.zMin);
 
             public int FaceOffset(int n)
             {
