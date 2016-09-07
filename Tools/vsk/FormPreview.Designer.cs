@@ -52,6 +52,7 @@
             this.label1.Size = new System.Drawing.Size(31, 13);
             this.label1.TabIndex = 2;
             this.label1.Text = "8888";
+            this.label1.Visible = false;
             // 
             // renderControl
             // 
@@ -64,6 +65,7 @@
             this.renderControl.Size = new System.Drawing.Size(496, 400);
             this.renderControl.TabIndex = 1;
             this.renderControl.Title = null;
+            this.renderControl.Visible = false;
             this.renderControl.VSync = true;
             this.renderControl.WindowBorder = OpenTK.WindowBorder.Resizable;
             this.renderControl.WindowState = OpenTK.WindowState.Normal;
