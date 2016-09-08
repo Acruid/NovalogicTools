@@ -6,33 +6,24 @@ using System.Windows.Forms;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
-using OpenTK.Input;
-using KeyPressEventArgs = OpenTK.KeyPressEventArgs;
 
 namespace vsk.Rendering
 {
     /// <summary>
     /// </summary>
-    public partial class RenderControl : GLControl, OpenTK.Platform.IGameWindow
+    public partial class RenderControl : GLControl
     {
         private readonly Stopwatch _stopwatch = new Stopwatch(); // available to all event handlers
         private Color _clearColor;
         private double _accumulator;
         private int _idleCounter;
-        private float _rotation;
-        private int _x;
-/*
-        /// <summary>
-        /// </summary>
-        public RenderControl() : base(GraphicsMode.Default, 3, 2, GraphicsContextFlags.ForwardCompatible | GraphicsContextFlags.Debug)
-        {
-            InitializeComponent();
-        }
-*/
+
+        public event EventHandler<FrameEventArgs> UpdateFrame;
+        public event EventHandler<FrameEventArgs> RenderFrame;
 
         /// <summary>
         /// </summary>
-        public RenderControl() : base(GraphicsMode.Default, 1, 0, GraphicsContextFlags.Debug)
+        public RenderControl() : base(GraphicsMode.Default, 4, 3, GraphicsContextFlags.Debug)
         {
             InitializeComponent();
         }
@@ -41,7 +32,7 @@ namespace vsk.Rendering
         /// </summary>
         [Category("Misc")]
         [Description("MyToolWindowControl properties")]
-        public Label FpsLabel { private get; set; }
+        public Label FpsLabel { get; set; }
 
         /// <summary>
         /// 
@@ -69,14 +60,12 @@ namespace vsk.Rendering
 
             if (DesignMode)
                 return;
-
-            Load?.Invoke(this, EventArgs.Empty);
-
-//            SetupViewport();
-
+            
             Application.Idle += ApplicationOnIdle;
+            
+            Cursor.Show();
 
-            _stopwatch.Start(); // start at application boot
+            _stopwatch.Start();
         }
 
         private void ApplicationOnIdle(object sender, EventArgs eventArgs)
@@ -86,7 +75,6 @@ namespace vsk.Rendering
             {
                 var milliseconds = ComputeTimeSlice();
                 Accumulate(milliseconds);
-//                Animate(milliseconds);
                 UpdateFrame?.Invoke(this, new FrameEventArgs(milliseconds));
                 Invalidate();
             }
@@ -105,8 +93,7 @@ namespace vsk.Rendering
             if (DesignMode || !IsHandleCreated)
                 return;
 
-            Resize?.Invoke(this, EventArgs.Empty);
-//            SetupViewport();
+//            Resize?.Invoke(this, EventArgs.Empty);
             Invalidate();
         }
 
@@ -118,7 +105,6 @@ namespace vsk.Rendering
 
             if (!DesignMode && IsHandleCreated)
             {
-//                Render();
                 RenderFrame?.Invoke(this, new FrameEventArgs());
             }
         }
@@ -131,8 +117,7 @@ namespace vsk.Rendering
 
             if (e.KeyCode != Keys.Space)
                 return;
-
-            _x++;
+            
             Invalidate();
         }
 
@@ -159,12 +144,6 @@ namespace vsk.Rendering
             return timeslice;
         }
 
-        private void Animate(double milliseconds)
-        {
-            var deltaRotation = (float) milliseconds/20.0f;
-            _rotation += deltaRotation;
-        }
-
         private void Accumulate(double milliseconds)
         {
             _idleCounter++;
@@ -173,98 +152,7 @@ namespace vsk.Rendering
             if (FpsLabel != null && !FpsLabel.IsDisposed)
                 FpsLabel.Text = _idleCounter.ToString();
             _accumulator -= 1000;
-            _idleCounter = 0; // don't forget to reset the counter!
+            _idleCounter = 0;
         }
-
-        private void Render()
-        {
-            MakeCurrent();
-
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-            GL.MatrixMode(MatrixMode.Modelview);
-            GL.LoadIdentity();
-
-            GL.Translate(_x, 0, 0); // position triangle according to our x variable
-
-            GL.Color3(Focused ? Color.Yellow : Color.Blue);
-
-            GL.Rotate(_rotation, Vector3.UnitZ); // OpenTK has this nice Vector3 class!
-            GL.Begin(PrimitiveType.Triangles);
-            GL.Vertex2(10, 20);
-            GL.Vertex2(100, 20);
-            GL.Vertex2(100, 50);
-            GL.End();
-
-            SwapBuffers();
-        }
-
-        private void SetupViewport()
-        {
-            var w = Width;
-            var h = Height;
-            GL.MatrixMode(MatrixMode.Projection);
-            GL.LoadIdentity();
-            GL.Ortho(0, w, 0, h, -1, 1); // Bottom-left corner pixel has coordinate (0, 0)
-            GL.Viewport(0, 0, w, h); // Use all of the glControl painting area
-        }
-
-#region GameWindow
-        public void Close()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void ProcessEvents()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Icon Icon { get; set; }
-        public string Title { get; set; }
-        public bool Exists { get; }
-        public WindowState WindowState { get; set; }
-        public WindowBorder WindowBorder { get; set; }
-        public int X { get; set; }
-        public int Y { get; set; }
-        public Rectangle ClientRectangle { get; set; }
-        public IInputDriver InputDriver { get; }
-        public MouseCursor Cursor { get; set; }
-        public bool CursorVisible { get; set; }
-        public event EventHandler<EventArgs> Move;
-        public event EventHandler<EventArgs> Resize;
-        public event EventHandler<CancelEventArgs> Closing;
-        public event EventHandler<EventArgs> Closed;
-        public event EventHandler<EventArgs> Disposed;
-        public event EventHandler<EventArgs> IconChanged;
-        public event EventHandler<EventArgs> TitleChanged;
-        public event EventHandler<EventArgs> VisibleChanged;
-        public event EventHandler<EventArgs> FocusedChanged;
-        public event EventHandler<EventArgs> WindowBorderChanged;
-        public event EventHandler<EventArgs> WindowStateChanged;
-        public event EventHandler<KeyboardKeyEventArgs> KeyDown;
-        public event EventHandler<KeyPressEventArgs> KeyPress;
-        public event EventHandler<KeyboardKeyEventArgs> KeyUp;
-        public event EventHandler<EventArgs> MouseLeave;
-        public event EventHandler<EventArgs> MouseEnter;
-        public event EventHandler<MouseButtonEventArgs> MouseDown;
-        public event EventHandler<MouseButtonEventArgs> MouseUp;
-        public event EventHandler<MouseMoveEventArgs> MouseMove;
-        public event EventHandler<MouseWheelEventArgs> MouseWheel;
-        public void Run()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Run(double updateRate)
-        {
-            throw new NotImplementedException();
-        }
-
-        public new event EventHandler<EventArgs> Load;
-        public event EventHandler<EventArgs> Unload;
-        public event EventHandler<FrameEventArgs> UpdateFrame;
-        public event EventHandler<FrameEventArgs> RenderFrame;
-#endregion
     }
 }

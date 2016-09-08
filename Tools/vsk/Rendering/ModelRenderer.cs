@@ -4,12 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
 using Novalogic._3DI;
+
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
-using OpenTK.Platform;
-using Render;
 using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
 namespace vsk.Rendering
@@ -45,19 +43,18 @@ namespace vsk.Rendering
         };
 
         private Camera _camera;
-        private readonly DebugProc _debugCallbackInstance = DebugCallback; // The callback delegate must be stored to avoid GC
         private readonly File3di _file;
 
         private readonly Dictionary<int, int> _texHandles = new Dictionary<int, int>();
         private readonly List<VAO> _vaoModels = new List<VAO>();
         private readonly List<int> _vaoTextures = new List<int>();
-        private readonly IGameWindow _viewport;
+        private readonly RenderControl _viewport;
         private Matrix4 _viewMatrix;
         private ShaderProgram _shaderTextured;
         private ShaderProgram _shaderUniColor;
         private VAO _vaoGrid;
 
-        public ModelRenderer(IGameWindow control, File3di file)
+        public ModelRenderer(RenderControl control, File3di file)
         {
             _viewport = control;
             _file = file;
@@ -67,86 +64,6 @@ namespace vsk.Rendering
 
             _viewport.UpdateFrame += OnUpdateFrame;
             _viewport.RenderFrame += OnRenderFrame;
-        }
-
-        private static void DebugCallback(DebugSource source, DebugType type, int id,
-            DebugSeverity severity, int length, IntPtr message, IntPtr userParam)
-        {
-            var msg = Marshal.PtrToStringAnsi(message);
-            Console.WriteLine("[GL] {0}; {1}; {2}; {3}; {4}\n",
-                source, type, id, severity, msg);
-        }
-
-        private static void CheckError()
-        {
-            var errorCode = GL.GetError();
-
-            if (errorCode == ErrorCode.NoError)
-                return;
-
-            string error;
-            var description = "No Description";
-
-            // Decode the error code
-            switch (errorCode)
-            {
-                case ErrorCode.InvalidEnum:
-                {
-                    error = "GL_INVALID_ENUM";
-                    description = "An unacceptable value has been specified for an enumerated argument";
-                    break;
-                }
-
-                case ErrorCode.InvalidValue:
-                {
-                    error = "GL_INVALID_VALUE";
-                    description = "A numeric argument is out of range";
-                    break;
-                }
-
-                case ErrorCode.InvalidOperation:
-                {
-                    error = "GL_INVALID_OPERATION";
-                    description = "The specified operation is not allowed in the current state";
-                    break;
-                }
-
-                case ErrorCode.StackOverflow:
-                {
-                    error = "GL_STACK_OVERFLOW";
-                    description = "This command would cause a stack overflow";
-                    break;
-                }
-
-                case ErrorCode.StackUnderflow:
-                {
-                    error = "GL_STACK_UNDERFLOW";
-                    description = "This command would cause a stack underflow";
-                    break;
-                }
-
-                case ErrorCode.OutOfMemory:
-                {
-                    error = "GL_OUT_OF_MEMORY";
-                    description = "there is not enough memory left to execute the command";
-                    break;
-                }
-
-                case ErrorCode.InvalidFramebufferOperationExt:
-                {
-                    error = "GL_INVALID_FRAMEBUFFER_OPERATION_EXT";
-                    description = "The object bound to FRAMEBUFFER_BINDING_EXT is not \"framebuffer complete\"";
-                    break;
-                }
-                default:
-                {
-                    error = errorCode.ToString();
-                    break;
-                }
-            }
-
-            // Log the error
-            throw new Exception("An internal OpenGL call failed: " + error + " (" + description + ")");
         }
 
         private static TextureUnit GetTexUnit(int num)
@@ -160,8 +77,6 @@ namespace vsk.Rendering
         /// <param name="e">Not used.</param>
         private void OnLoad(EventArgs e)
         {
-            GL.DebugMessageCallback(_debugCallbackInstance, IntPtr.Zero);
-
             _shaderUniColor = new ShaderProgram();
             _shaderUniColor.Add(new Shader(ShaderType.VertexShader, @"Rendering/Shaders/vert_uniColor.gls"));
             _shaderUniColor.Add(new Shader(ShaderType.FragmentShader, @"Rendering/Shaders/frag_uniColor.gls"));
@@ -264,7 +179,7 @@ namespace vsk.Rendering
             _shaderUniColor.SetUniformMatrix4("scale_matrix", false, ref scaleMatrix);
             _shaderUniColor.SetUniformVec4("vertColor", ref color);
 
-            CheckError();
+//            CheckError();
         }
 
         private void CreateVAO()
@@ -273,7 +188,7 @@ namespace vsk.Rendering
 
             foreach (var mesh in BuildMeshes(lod))
             {
-                var vao = new VAO(PrimitiveType.Triangles, mesh.CoordVerts.Count);
+                var vao = new VAO(BeginMode.Triangles, mesh.CoordVerts.Count);
                 vao.Use();
 
                 var vbo = new VBO();
@@ -293,7 +208,7 @@ namespace vsk.Rendering
                 var lodMat = lod.Materials[mesh.MatIndex];
                 _vaoTextures.Add(lodMat.TexIndex);
             }
-            _vaoGrid = new VAO(PrimitiveType.Lines, _axisVerts.Length)
+            _vaoGrid = new VAO(BeginMode.Lines, _axisVerts.Length)
             {
                 DisableDepth = true
             };
@@ -303,7 +218,7 @@ namespace vsk.Rendering
             gridVerts.Buffer(BufferTarget.ArrayBuffer, _axisVerts, 3);
             _vaoGrid.AddVBO(0, gridVerts);
 
-            CheckError();
+//            CheckError();
         }
 
         private static IEnumerable<GlMesh> BuildMeshes(File3di.ModelLod lod)

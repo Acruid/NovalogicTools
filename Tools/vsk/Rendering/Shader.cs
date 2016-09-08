@@ -2,7 +2,7 @@
 using System.IO;
 using OpenTK.Graphics.OpenGL;
 
-namespace Render
+namespace vsk.Rendering
 {
     internal class Shader
     {

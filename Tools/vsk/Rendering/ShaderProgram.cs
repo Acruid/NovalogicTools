@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
-using Render;
 
 namespace vsk.Rendering
 {
@@ -43,7 +42,7 @@ namespace vsk.Rendering
             GL.LinkProgram(_handle);
 
             int compiled;
-            GL.GetProgram(_handle, GetProgramParameterName.LinkStatus, out compiled);
+            GL.GetProgram(_handle, ProgramParameter.LinkStatus, out compiled);
             if (compiled != 1)
             {
                 throw new Exception(GL.GetProgramInfoLog(_handle));

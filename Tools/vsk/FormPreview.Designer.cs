@@ -58,19 +58,12 @@
             // 
             this.renderControl.BackColor = System.Drawing.Color.Black;
             this.renderControl.ClearColor = System.Drawing.Color.Black;
-            this.renderControl.CursorVisible = false;
-            this.renderControl.Icon = null;
             this.renderControl.Location = new System.Drawing.Point(12, 25);
             this.renderControl.Name = "renderControl";
             this.renderControl.Size = new System.Drawing.Size(496, 400);
             this.renderControl.TabIndex = 1;
-            this.renderControl.Title = null;
             this.renderControl.Visible = false;
             this.renderControl.VSync = true;
-            this.renderControl.WindowBorder = OpenTK.WindowBorder.Resizable;
-            this.renderControl.WindowState = OpenTK.WindowState.Normal;
-            this.renderControl.X = 0;
-            this.renderControl.Y = 0;
             // 
             // FormPreview
             // 

@@ -7,7 +7,7 @@ namespace vsk.Rendering
     {
         private bool _indexed;
 
-        public VAO(PrimitiveType drawType, int numVerts)
+        public VAO(BeginMode drawType, int numVerts)
         {
             Handle = GL.GenVertexArray();
             DrawType = drawType;
@@ -18,7 +18,7 @@ namespace vsk.Rendering
         public bool DisableDepth { get; set; }
 
         private int NumVerts { get; }
-        private PrimitiveType DrawType { get; }
+        private BeginMode DrawType { get; }
 
         public void Use()
         {
