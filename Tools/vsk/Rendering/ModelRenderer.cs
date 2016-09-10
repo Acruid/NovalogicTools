@@ -49,6 +49,7 @@ namespace vsk.Rendering
         private readonly List<VAO> _vaoModels = new List<VAO>();
         private readonly List<int> _vaoTextures = new List<int>();
         private readonly RenderControl _viewport;
+        private Light _light;
         private Matrix4 _viewMatrix;
         private ShaderProgram _shaderTextured;
         private ShaderProgram _shaderUniColor;
@@ -153,22 +154,30 @@ namespace vsk.Rendering
 
         private void CreateShaders()
         {
-            var lod = _file.Lods[0];
-
             _camera = new Camera(_viewport.ClientSize, Spawn, Center, Up);
             var projectionMatrix = _camera.ProjectionMatrix;
             _viewMatrix = _camera.ViewMatrix;
 
+             _light = new Light(new Vector3(2.0f, 0.0f, 1.0f), new Vector3(1, 1, 1));
+            var ambiantLight = new Vector4(0.1f);
+            _shaderTextured.SetUniformVec4("ambiantLight", ref ambiantLight);
+
             double w, l, h;
             _file.Lods[0].Dimensions(out w, out l, out h);
-//            var maxdim = Math.Max(Math.Max(w, l), h);
             var maxdim = Math.Max(w, l);
 
             var scaleMatrix = Matrix4.CreateScale((float) (1/maxdim));
+            var worldMatrix = Matrix4.Identity*scaleMatrix;
 
-            _shaderTextured.SetUniformMatrix4("projection_matrix", false, ref projectionMatrix);
-            _shaderTextured.SetUniformMatrix4("modelview_matrix", false, ref _viewMatrix);
-            _shaderTextured.SetUniformMatrix4("scale_matrix", false, ref scaleMatrix);
+            _shaderTextured.SetUniformMatrix4("matrixProjection", false, ref projectionMatrix);
+            _shaderTextured.SetUniformMatrix4("matrixView", false, ref _viewMatrix);
+            _shaderTextured.SetUniformMatrix4("matrixWorld", false, ref worldMatrix);
+
+            var lightPos = _light.Position;
+            _shaderTextured.SetUniformVec3("lightPosition", ref lightPos);
+
+            var lightColor = _light.Color;
+            _shaderTextured.SetUniformVec3("lightColor", ref lightColor);
 
             _shaderUniColor.Use();
 
@@ -288,9 +297,9 @@ namespace vsk.Rendering
             if (!_camera.Think(e.Time))
                 return;
 
-            var modelView = _camera.ViewMatrix;
-            _shaderTextured.SetUniformMatrix4("modelview_matrix", false, ref modelView);
-            _shaderUniColor.SetUniformMatrix4("modelview_matrix", false, ref modelView);
+            var matrixView = _camera.ViewMatrix;
+            _shaderTextured.SetUniformMatrix4("matrixView", false, ref matrixView);
+            _shaderUniColor.SetUniformMatrix4("modelview_matrix", false, ref matrixView);
         }
 
 

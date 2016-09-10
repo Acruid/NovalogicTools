@@ -2,9 +2,14 @@
 
 precision highp float;
 
+uniform vec4 ambiantLight; 
+
 uniform sampler2D mytexture;
+uniform vec3 lightColor;
 
 in vec2 texcoord;
+in vec4 normal;
+in vec3 toLight;
 
 void main(void)
 {
@@ -13,5 +18,17 @@ void main(void)
 	if(color.a < 0.001)
 		discard;
 
-	gl_FragColor = color;
+	vec3 unitNormal = normalize(normal.xyz);
+	vec3 unitToLight = normalize(toLight);
+	float nDotL = dot(unitNormal, unitToLight);
+
+	float brightness = max(nDotL, 0.0); // only light front
+//	float brightness = abs(nDotL); // light the front & back
+
+	vec4 diffuse = brightness * vec4(lightColor, 1.0);
+
+	diffuse += ambiantLight;
+	diffuse = clamp(diffuse, 0.0f, 1.0f);
+
+	gl_FragColor = color * diffuse;
 }

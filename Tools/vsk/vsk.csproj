@@ -78,6 +78,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rendering\Camera.cs" />
+    <Compile Include="Rendering\Light.cs" />
     <Compile Include="Rendering\ModelRenderer.cs" />
     <Compile Include="Rendering\RenderControl.cs">
       <SubType>UserControl</SubType>
