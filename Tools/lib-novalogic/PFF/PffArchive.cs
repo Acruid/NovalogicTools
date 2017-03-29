@@ -26,6 +26,10 @@ namespace Novalogic.PFF
 
             if (version == PffVersion.PFF3 && headerSize == 20)
                 _header = reader.ReadBytes(20).ToStruct<Header_Pff3_20>();
+
+            else if (version == PffVersion.PFF2 && headerSize == 20)
+                _header = reader.ReadBytes(20).ToStruct<Header_Pff3_20>();
+
             else
                 throw new NotImplementedException();
         }
@@ -86,7 +90,17 @@ namespace Novalogic.PFF
                     if (_header.RecordSize == 32)
                     {
                         var entry = _bReader.ReadBytes(32).ToStruct<Entry_Pff3_32>();
-                        pffEntry = new PffEntry(_bReader, entry);
+                        pffEntry = new PffEntry(_bReader, entry, _header.Signature);
+                    }
+                    else
+                        throw new NotImplementedException();
+                }
+                else if (_header.Signature == PffVersion.PFF2)
+                {
+                    if (_header.RecordSize == 32)
+                    {
+                        var entry = _bReader.ReadBytes(32).ToStruct<Entry_Pff3_32>();
+                        pffEntry = new PffEntry(_bReader, entry, _header.Signature);
                     }
                     else
                         throw new NotImplementedException();
@@ -104,7 +118,7 @@ namespace Novalogic.PFF
         /// <summary>
         /// 
         /// </summary>
-        public interface IPffEntry
+        internal interface IPffEntryAbstract
         {
             UInt32 Deleted { get; }
             UInt32 FileOffset { get; }
@@ -126,7 +140,7 @@ namespace Novalogic.PFF
         }
 
         [StructLayout(LayoutKind.Sequential, Size = 32, Pack = 1)]
-        private struct Entry_Pff3_32 : IPffEntry
+        private struct Entry_Pff3_32 : IPffEntryAbstract
         {
             public UInt32 Deleted { get; }
             public UInt32 FileOffset { get; }
@@ -137,11 +151,12 @@ namespace Novalogic.PFF
             public Byte Null { get; }
         }
 
-        private enum PffVersion : uint
+        internal enum PffVersion : uint
         {
-            PFF3 = 0x33464650 //{'P','F','F','3'}
+            PFF2 = 0x32464650, //{'P','F','F','2'}
+            PFF3 = 0x33464650, //{'P','F','F','3'}
         }
-
+        
         // ReSharper restore UnassignedGetOnlyAutoProperty
     }
 }

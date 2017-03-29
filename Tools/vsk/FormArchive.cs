@@ -129,6 +129,8 @@ namespace vsk
                         File.WriteAllBytes(filePath, contents);
                         File.SetLastWriteTime(filePath, entry.PackedTimeUtc.ToLocalTime());
                     }
+                    else
+                        throw new Exception($"File {entry.FilePath} exists in archive, but file contents are empty?");
                 }
 
 

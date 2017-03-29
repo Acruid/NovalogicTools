@@ -5,13 +5,15 @@ namespace Novalogic.PFF
 {
     public class PffEntry
     {
-        private readonly PffArchive.IPffEntry _entry;
+        private readonly PffArchive.IPffEntryAbstract _entry;
         private readonly BinaryReader _reader;
+        private readonly PffArchive.PffVersion _version;
 
-        public PffEntry(BinaryReader reader, PffArchive.IPffEntry entry)
+        internal PffEntry(BinaryReader reader, PffArchive.IPffEntryAbstract entry, PffArchive.PffVersion version)
         {
             _reader = reader;
             _entry = entry;
+            _version = version;
         }
 
         public uint FileSize => _entry.FileSize;
@@ -34,15 +36,21 @@ namespace Novalogic.PFF
         /// </exception>
         public byte[] GetContents()
         {
-            if (_entry.Deleted != 0 || _entry.FileOffset == uint.MaxValue)
-                return null;
+            if ((_version == PffArchive.PffVersion.PFF3 && _entry.Deleted == 0 && _entry.FileOffset != uint.MaxValue) ||
+                _version == PffArchive.PffVersion.PFF2)
+            {
 
-            var stream = _reader.BaseStream;
-            var oldFilePos = stream.Position;
-            stream.Position = _entry.FileOffset;
-            var file = _reader.ReadBytes((int) _entry.FileSize);
-            stream.Position = oldFilePos;
-            return file;
+                var stream = _reader.BaseStream;
+                var oldFilePos = stream.Position;
+                stream.Position = _entry.FileOffset;
+                var file = _reader.ReadBytes((int) _entry.FileSize);
+                stream.Position = oldFilePos;
+                return file;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }
