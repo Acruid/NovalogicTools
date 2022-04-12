@@ -86,12 +86,5 @@ namespace vsk.Rendering
             var uniformId = GetUniform(uniformName);
             GL.Uniform4(uniformId, vector);
         }
-
-        public void SetUniformVec3(string uniformName, ref Vector3 vector)
-        {
-            Use();
-            var uniformId = GetUniform(uniformName);
-            GL.Uniform3(uniformId, vector);
-        }
     }
 }

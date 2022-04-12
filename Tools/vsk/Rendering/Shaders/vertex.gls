@@ -2,11 +2,9 @@
 
 precision highp float;
 
-uniform mat4 matrixProjection;
-uniform mat4 matrixView;
-uniform mat4 matrixWorld;
-
-uniform vec3 lightPosition;
+uniform mat4 projection_matrix;
+uniform mat4 modelview_matrix;
+uniform mat4 scale_matrix;
 
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;
@@ -14,15 +12,11 @@ layout(location = 2) in vec3 in_color;
 layout(location = 3) in vec2 in_UV;
 
 out vec2 texcoord;
-out vec4 normal;
-out vec3 toLight;
 
 void main(void)
 {
-	vec4 worldPos = matrixWorld * vec4(in_position, 1);
-    gl_Position = matrixProjection * matrixView * worldPos;
-
+	//texcoord = vec2(0.5f, 0.5f);
     texcoord = in_UV;
-	normal = matrixWorld * vec4(in_normal, 1);
-	toLight = lightPosition - worldPos.xyz;
+  
+    gl_Position = projection_matrix * modelview_matrix * scale_matrix * vec4(in_position, 1);
 }
