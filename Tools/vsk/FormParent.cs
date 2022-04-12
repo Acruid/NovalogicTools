@@ -16,14 +16,6 @@ namespace vsk
         public FormParent()
         {
             InitializeComponent();
-#if DEBUG
-            var mdiChild = new FormArchive
-            {
-                MdiParent = this,
-                ArchiveFile = new FileInfo(@"D:\Organization\Games\Delta Force 2\Game\Df2.pff")
-            };
-            mdiChild.Show();
-#endif
         }
 
         public void OpenFilePreview(PffEntry fileContents)
