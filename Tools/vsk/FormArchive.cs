@@ -2,8 +2,6 @@
 using System.Drawing;
 using System.Globalization;
 using System.IO;
-using System.Security;
-using System.Security.Permissions;
 using System.Windows.Forms;
 using Novalogic.PFF;
 
@@ -106,16 +104,11 @@ namespace vsk
             Program.MainForm.OpenFilePreview(_archive.GetEntry(listViewItem.Text));
         }
 
-        private void extractToolStripMenuItem_Click(object sender, System.EventArgs e)
+        private void extractToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var targetDir = Directory.GetCurrentDirectory();
-            if (!CanWriteToFolder(targetDir))
-                throw new Exception("Cannot write to archive folder.");
-
             var archiveName = Path.GetFileNameWithoutExtension(_archive.FileInfo.Name);
             var extractDir = !string.IsNullOrWhiteSpace(archiveName) ? archiveName : "EXTRACTED";
             Directory.CreateDirectory(extractDir);
-
 
             foreach (ListViewItem item in listView.SelectedItems)
             {
@@ -132,17 +125,7 @@ namespace vsk
                     else
                         throw new Exception($"File {entry.FilePath} exists in archive, but file contents are empty?");
                 }
-
-
             }
-        }
-
-        private static bool CanWriteToFolder(string folder)
-        {
-            var permission = new FileIOPermission(FileIOPermissionAccess.Write, folder);
-            var permissionSet = new PermissionSet(PermissionState.None);
-            permissionSet.AddPermission(permission);
-            return permissionSet.IsSubsetOf(AppDomain.CurrentDomain.PermissionSet);
         }
     }
 }
