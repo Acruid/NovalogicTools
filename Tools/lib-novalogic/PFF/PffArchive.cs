@@ -80,7 +80,7 @@ namespace Novalogic.PFF
                 return _cachedEntries;
 
             var entries = new List<PffEntry>();
-            _bReader.BaseStream.Position = _header.RecordOffset + _header.RecordSize;
+            _bReader.BaseStream.Position = _header.RecordOffset;
 
             for (var i = 0; i < _header.RecordCount; i++)
             {
